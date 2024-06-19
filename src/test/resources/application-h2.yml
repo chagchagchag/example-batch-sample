@@ -1,0 +1,18 @@
+spring:
+  batch:
+    job:
+      names: ${job.name:NONE}
+    jdbc:
+      initialize-schema: always
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:test
+#    data: # deprecated
+#      - classpath:person.sql
+  sql:
+    init:
+      mode: always
+      data-locations:
+        - classpath:person.sql
+      schema-locations:
+        - classpath:schema.sql
