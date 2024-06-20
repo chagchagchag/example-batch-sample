@@ -11,4 +11,10 @@ public class MemberEntityFactory {
       null, name, email
     );
   }
+
+  public MemberEntity readFrom(Long id, String name, String email){
+    return MemberEntity.ofAll(
+        id, name, email
+    );
+  }
 }
