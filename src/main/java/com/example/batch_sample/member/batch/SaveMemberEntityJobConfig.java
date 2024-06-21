@@ -35,7 +35,7 @@ import org.springframework.core.io.ClassPathResource;
 @Slf4j
 @RequiredArgsConstructor
 @Configuration
-public class SaveMemberEntityJobConfiguration {
+public class SaveMemberEntityJobConfig {
   private final JobBuilderFactory jobBuilderFactory;
   private final StepBuilderFactory stepBuilderFactory;
   private final EntityManagerFactory entityManagerFactory;
