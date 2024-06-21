@@ -9,7 +9,7 @@ version = "0.0.1-SNAPSHOT"
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
+		languageVersion = JavaLanguageVersion.of(17)
 	}
 }
 
@@ -24,6 +24,7 @@ repositories {
 }
 
 dependencies {
+	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 	implementation("org.springframework.boot:spring-boot-starter-batch")
 	implementation("org.springframework.batch:spring-batch-integration")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -33,7 +34,10 @@ dependencies {
 	annotationProcessor("org.projectlombok:lombok")
 
 	runtimeOnly("com.h2database:h2")
-	runtimeOnly("com.mysql:mysql-connector-j")
+//	runtimeOnly("com.mysql:mysql-connector-j")
+	// https://mvnrepository.com/artifact/mysql/mysql-connector-java
+	implementation("mysql:mysql-connector-java:8.0.31")
+
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.batch:spring-batch-test")

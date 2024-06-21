@@ -14,7 +14,11 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.database.JdbcPagingItemReader;
+import org.springframework.batch.item.database.builder.JdbcPagingItemReaderBuilder;
+import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilder;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
 import org.springframework.batch.item.file.mapping.DefaultLineMapper;
@@ -26,28 +30,31 @@ import org.springframework.core.io.ClassPathResource;
 @RequiredArgsConstructor
 @Slf4j
 @Configuration
-public class CsvToTableMemberDataBatchConfig {
+public class SampleDataToCsvJdbcJpaBatchConfig {
   private final JobBuilderFactory jobBuilderFactory;
   private final StepBuilderFactory stepBuilderFactory;
   private final DataSource dataSource;
   private final EntityManagerFactory entityManagerFactory;
   private final MemberEntityFactory memberEntityFactory;
 
+  private static final String JOB_NAME = "sampleDataToCsvJdbcJpaJob";
+  private static final int CHUNK_SIZE = 30;
+
   @Bean
-  public Job csvToTableMemberDataJob() throws Exception{
-    return jobBuilderFactory.get("csvToTableMemberDataJob")
+  public Job sampleDataToCsvJdbcJpaJob() throws Exception{
+    return jobBuilderFactory.get(JOB_NAME)
         .incrementer(new RunIdIncrementer())
         .start(readDumpDataStep())
         .next(csvFileReadStep())
-//        .next(this.jdbcStep())
-//        .next(this.jpaStep())
+//        .next(jdbcStep())
+        .next(jpaStep())
         .build();
   }
 
   @Bean
   public Step readDumpDataStep(){
     return this.stepBuilderFactory.get("readDumpDataStep")
-        .<MemberEntity, MemberEntity>chunk(10)
+        .<MemberEntity, MemberEntity>chunk(CHUNK_SIZE)
         .reader(new LinkedListItemReader<MemberEntity>(MemberEntityFixtures.normalMemberList()))
         .writer(loggingWriter())
         .build();
@@ -56,7 +63,7 @@ public class CsvToTableMemberDataBatchConfig {
   @Bean
   public Step csvFileReadStep() throws Exception {
     return stepBuilderFactory.get("csvFileReadStep")
-        .<MemberEntity, MemberEntity>chunk(10)
+        .<MemberEntity, MemberEntity>chunk(CHUNK_SIZE)
         .reader(csvFileItemReader())
         .writer(loggingWriter())
         .build();
@@ -86,6 +93,52 @@ public class CsvToTableMemberDataBatchConfig {
     itemReader.afterPropertiesSet();
 
     return itemReader;
+  }
+
+//  @Bean
+  public Step jdbcStep() throws Exception {
+    return stepBuilderFactory.get(JOB_NAME + "saveUsingJpaStep")
+            .<MemberEntity, MemberEntity>chunk(10)
+            .reader(memberEntityItemJdbcReader())
+            .writer(loggingWriter())
+            .build();
+  }
+
+  public ItemReader<MemberEntity> memberEntityItemJdbcReader() throws Exception {
+    JdbcPagingItemReader<MemberEntity> reader = new JdbcPagingItemReaderBuilder<MemberEntity>()
+            .name("memberEntityItemReader")
+            .dataSource(dataSource)
+            .rowMapper((rs, rowNum) -> MemberEntity.ofAll(
+                    rs.getLong(1),
+                    rs.getString(2),
+                    rs.getString(3)
+            ))
+            .pageSize(CHUNK_SIZE)
+            .name(JOB_NAME + "_memberEntityItemReader")
+            .selectClause("id,name,email")
+            .fromClause("member")
+            .build();
+
+    reader.afterPropertiesSet();
+    return reader;
+  }
+
+  @Bean
+  public Step jpaStep() throws Exception {
+    return stepBuilderFactory.get(JOB_NAME + "jpaStep")
+            .<MemberEntity, MemberEntity>chunk(10)
+            .reader(memberEntityItemJpaReader())
+            .writer(loggingWriter())
+            .build();
+  }
+
+  public ItemReader<MemberEntity> memberEntityItemJpaReader() throws Exception {
+    return new JpaPagingItemReaderBuilder<MemberEntity>()
+            .queryString("select m from MemberEntity m")
+            .name("memberEntityItemJpaReader")
+            .entityManagerFactory(entityManagerFactory)
+            .pageSize(CHUNK_SIZE)
+            .build();
   }
 
   private ItemWriter<MemberEntity> loggingWriter(){

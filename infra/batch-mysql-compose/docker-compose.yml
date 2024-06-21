@@ -1,0 +1,23 @@
+version: '3.7'
+services:
+  example-mysql:
+    image: mysql:5.7.39-debian
+    restart: always
+    #    command: --lower_case_table_names=1
+    container_name: batch-mysql
+    hostname: batch-mysql
+    ports:
+      - "23306:3306"
+    environment:
+      - MYSQL_USER=user
+      - MYSQL_USER_HOST=%
+      - MYSQL_PASSWORD=test1357
+      - MYSQL_DATABASE=spring_batch
+      - MYSQL_ROOT_HOST=%
+      - MYSQL_ROOT_PASSWORD=test1357
+      - TZ=UTC
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - ./init/:/docker-entrypoint-initdb.d/

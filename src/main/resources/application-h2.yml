@@ -13,6 +13,6 @@ spring:
     init:
       mode: always
       data-locations:
-        - classpath:person.sql
+        - classpath:member.sql
       schema-locations:
-        - classpath:schema.sql
+        - classpath:schema-h2.sql
