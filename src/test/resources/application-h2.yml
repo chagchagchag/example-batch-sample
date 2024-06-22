@@ -7,12 +7,12 @@ spring:
   datasource:
     driver-class-name: org.h2.Driver
     url: jdbc:h2:mem:test
-#    data: # deprecated
-#      - classpath:person.sql
+  #    data: # deprecated
+  #      - classpath:person.sql
   sql:
     init:
       mode: always
       data-locations:
-        - classpath:person.sql
+        - classpath:member.sql
       schema-locations:
-        - classpath:schema.sql
+        - classpath:schema-h2.sql
