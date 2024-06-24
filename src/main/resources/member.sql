@@ -1,6 +1,8 @@
 insert into member(name, email)
-values('aaa','aaa@gmail.com');
+values('sample1','sample1@gmail.com');
+
 insert into member(name, email)
-values('bbb','bbb@gmail.com');
+values('sample2','sample2@gmail.com');
+
 insert into member(name, email)
-values('ccc','ccc@gmail.com');
+values('sample3','sample3@gmail.com');
