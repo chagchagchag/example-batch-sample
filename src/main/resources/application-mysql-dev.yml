@@ -1,4 +1,11 @@
 spring:
+  batch:
+    job:
+      enabled: ${spring.batch.job.names:NONE}
+      names: ${job.name:NONE}
+    #      enabled: ${job.name:NONE}
+    jdbc:
+      initialize-schema: never
   datasource:
     hikari:
       jdbc-url: jdbc:mysql://127.0.0.1:23306/spring_batch?characterEncoding=UTF-8&serverTimezone=UTC&rewriteBatchedStatements=true
