@@ -1,4 +1,4 @@
-package com.example.batch_sample.member.batch;
+package com.example.batch_sample.member.batch.job;
 
 import com.example.batch_sample.global.reader.LinkedListItemReader;
 import com.example.batch_sample.member.entity.MemberEntity;

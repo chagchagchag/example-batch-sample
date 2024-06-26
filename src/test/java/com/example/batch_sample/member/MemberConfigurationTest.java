@@ -1,7 +1,7 @@
 package com.example.batch_sample.member;
 
 import com.example.batch_sample.MyTestConfiguration;
-import com.example.batch_sample.member.batch.SaveMemberEntityJobConfig;
+import com.example.batch_sample.member.batch.job.SaveMemberEntityJobConfig;
 import com.example.batch_sample.member.entity.repository.MemberEntityRepository;
 import com.example.batch_sample.member.enums.MemberEntitySteps;
 import org.assertj.core.api.Assertions;

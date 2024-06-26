@@ -1,8 +1,10 @@
-package com.example.batch_sample.member.batch;
+package com.example.batch_sample.member.batch.job;
 
 import com.example.batch_sample.global.batch.processor.DuplicateValidationProcessor;
 import com.example.batch_sample.global.exception.MemberNameNotExistException;
+import com.example.batch_sample.member.batch.MemberEntityValidationRetryProcessor;
 import com.example.batch_sample.member.batch.SaveMemberListener.SaveMemberAnnotationJobExecutionListener;
+import com.example.batch_sample.member.batch.SaveMemberListener.SaveMemberJobExecutionListener;
 import com.example.batch_sample.member.entity.MemberEntity;
 import com.example.batch_sample.member.entity.factory.MemberEntityFactory;
 import javax.persistence.EntityManagerFactory;
@@ -46,8 +48,8 @@ public class SaveMemberEntityJobConfig {
     return jobBuilderFactory.get("saveMemberJob")
         .incrementer(new RunIdIncrementer())
         .start(saveMemberStep(null))
-        .listener(new SaveMemberListener.SaveMemberJobExecutionListener())
-        .listener(new SaveMemberListener.SaveMemberAnnotationJobExecutionListener())
+        .listener(new SaveMemberJobExecutionListener())
+        .listener(new SaveMemberAnnotationJobExecutionListener())
         .build();
   }
 
