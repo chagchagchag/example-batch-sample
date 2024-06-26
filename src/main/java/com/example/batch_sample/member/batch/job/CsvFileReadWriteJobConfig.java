@@ -8,9 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemWriter;
@@ -30,7 +28,7 @@ import org.springframework.core.io.FileSystemResource;
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
-public class CsvFileSampleJobConfig {
+public class CsvFileReadWriteJobConfig {
 
   private final JobBuilderFactory jobBuilderFactory;
   private final StepBuilderFactory stepBuilderFactory;
@@ -41,26 +39,23 @@ public class CsvFileSampleJobConfig {
 
   @Bean
   public Job csvFileSampleJob() throws Exception {
-    return this.jobBuilderFactory.get("csvFileSampleJob")
+    return this.jobBuilderFactory.get(jobName)
         .incrementer(new RunIdIncrementer())
         .start(this.csvFileSampleStep())
         .build();
   }
 
-  @Bean
-  @JobScope
-  public Step csvFileSampleStep() throws Exception {
-    return this.stepBuilderFactory.get("csvFileSampleStep")
+  private Step csvFileSampleStep() throws Exception {
+    return this.stepBuilderFactory.get("CSV_FILE_IO_SAMPLE_STEP")
         .<MemberEntity, MemberEntity>chunk(CHUNK_SIZE)
         .reader(csvFileItemReader())
         .processor(loggingProcessor())
+        .processor(csvFileSampleJobProcessor())
         .writer(csvFileItemWriter())
         .build();
   }
 
-  @Bean
-  @StepScope
-  public FlatFileItemReader<MemberEntity> csvFileItemReader() throws Exception {
+  private FlatFileItemReader<MemberEntity> csvFileItemReader() throws Exception {
     // tokenizer
     DelimitedLineTokenizer tokenizer = new DelimitedLineTokenizer();
     tokenizer.setNames("id", "name", "email");
@@ -79,21 +74,20 @@ public class CsvFileSampleJobConfig {
     });
 
     // FlatMapItemReader 정의
-    FlatFileItemReader<MemberEntity> itemReader = new FlatFileItemReaderBuilder<MemberEntity>()
-        .name("itemReader") // READER NAME 지정
+    FlatFileItemReader<MemberEntity> csvFileItemReader = new FlatFileItemReaderBuilder<MemberEntity>()
+        .name("CSV_FILE_IO_SAMPLE_JOB"+"__csvFileItemReader") // READER NAME 지정
         .encoding("UTF-8") // encoding 방식 지정
         .resource(new ClassPathResource("member-test-input.csv")) // Classpath 내의 test.csv 파일
         .linesToSkip(1) // 첫 1줄은 skip (제목)
         .lineMapper(lineMapper) // lineMapper 지정
         .build();
 
-    itemReader.afterPropertiesSet();
+    csvFileItemReader.afterPropertiesSet();
 
-    return itemReader;
+    return csvFileItemReader;
   }
 
-  @Bean
-  public FlatFileItemWriter<MemberEntity> csvFileItemWriter() throws Exception {
+  private FlatFileItemWriter<MemberEntity> csvFileItemWriter() throws Exception {
     // fieldExtractor
     // MemberEntity 에 대응되는 POJO 타입에 대응되도록 필드명을 매핑하는 Extractor
     BeanWrapperFieldExtractor<MemberEntity> fieldExtractor = new BeanWrapperFieldExtractor<>();
@@ -108,9 +102,10 @@ public class CsvFileSampleJobConfig {
 
     // FlatFileItemWriter 객체를 FlatFileItemWriterBuilder 를 통해 생성
     FlatFileItemWriter<MemberEntity> csvFileItemWriter = new FlatFileItemWriterBuilder<MemberEntity>()
-        .name("csvFileItemWriter")
+        .name("CSV_FILE_IO_SAMPLE_JOB" + "___csvFileItemWriter")
         .encoding("UTF-8")
         .resource(new FileSystemResource("output/member-test-output.csv"))
+//        .resource(new ClassPathResource("member-test-output.csv"))
         .lineAggregator(lineAggregator)
         .headerCallback(writer -> writer.write("id, 이름, 이메일"))
         .footerCallback(writer -> writer.write("-------"))
@@ -122,14 +117,14 @@ public class CsvFileSampleJobConfig {
     return csvFileItemWriter;
   }
 
-  public ItemProcessor<MemberEntity, MemberEntity> loggingProcessor(){
+  private ItemProcessor<MemberEntity, MemberEntity> loggingProcessor(){
     return memberEntity -> {
       log.info("memberEntity = {}", memberEntity.getName());
       return memberEntity;
     };
   }
 
-  public ItemProcessor<MemberEntity, MemberEntity> csvFileSampleJobProcessor(){
+  private ItemProcessor<MemberEntity, MemberEntity> csvFileSampleJobProcessor(){
     return memberEntity -> {
       String newName = memberEntity.getName() + memberEntity.getName();
 
