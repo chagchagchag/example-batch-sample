@@ -33,7 +33,7 @@ import org.springframework.core.io.ClassPathResource;
 @RequiredArgsConstructor
 @Slf4j
 @Configuration
-public class SampleDataToCsvJdbcJpaBatchConfig {
+public class SampleDataToCsvJdbcJpaBatchJobConfig {
   private final JobBuilderFactory jobBuilderFactory;
   private final StepBuilderFactory stepBuilderFactory;
   private final DataSource dataSource;

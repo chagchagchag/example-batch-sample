@@ -51,8 +51,6 @@ public class CsvInputOutputJobConfig {
   @Bean
   @StepScope
   public FlatFileItemReader<MemberEntity> csvInputOutputReader_1111111() throws Exception {
-    FileSystemResource fileSystemResource = new FileSystemResource("src/main/resources/member-test-input.csv");
-    log.info("classpathResource >>>>>>> {}", fileSystemResource.getFile().getPath());
     // lineMapper
     DefaultLineMapper<MemberEntity> lineMapper = new DefaultLineMapper<>();
     // tokenizer
